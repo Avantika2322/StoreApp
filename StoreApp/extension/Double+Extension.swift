@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+extension Double {
+    func formatCurrency() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        return formatter.string(from: NSNumber(value: self)) ?? "0.00"
+    }
+}

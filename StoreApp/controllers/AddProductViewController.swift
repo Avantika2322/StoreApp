@@ -13,6 +13,7 @@ class AddProductViewController: UIViewController {
     
     private var selectedCategory: GetAllCategoryRes?
     private var addProductFormState = AddProductFormState()
+    var delegate: AddProductViewControllerDelegate?
     
     lazy var titleTextField: UITextField = {
         let textField = UITextField()
@@ -76,11 +77,27 @@ class AddProductViewController: UIViewController {
     }()
     
     @objc private func cancelTapped(_ sender: UIBarButtonItem) {
-        
+        delegate?.addProductViewControllerDidCancel(self)
     }
     
     @objc private func saveTapped(_ sender: UIBarButtonItem) {
+        guard let title = titleTextField.text,
+              let priceString = priceTextField.text,
+              let imgUrlString = imgUrlTextField.text,
+              let selectedCategory = selectedCategory else { return }
+        let description = descTextView.text ?? ""
         
+        let price = Double(priceString) ?? 0
+        let imgUrl = URL(string: imgUrlString) ?? URL(string: "https://via.placeholder.com/150")!
+        
+        let product = GetProductsByIdRes(
+            title: title,
+            price: price,
+            description: description,
+            images: [imgUrl],
+            category: selectedCategory
+        )
+        delegate?.addProductViewControllerDidSave(self, didAddProduct: product)
     }
     
     @objc private func textFieldDidChange(_ sender: UITextField) {
@@ -156,4 +173,10 @@ extension AddProductViewController: UITextViewDelegate {
         addProductFormState.description = !textView.text.isEmpty
         saveBarItemButton.isEnabled = addProductFormState.isValid
     }
+}
+
+protocol AddProductViewControllerDelegate {
+    func addProductViewControllerDidCancel(_ controller: AddProductViewController)
+    func addProductViewControllerDidSave(_ controller: AddProductViewController, didAddProduct product: GetProductsByIdRes)
+    
 }

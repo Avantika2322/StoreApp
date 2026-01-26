@@ -10,6 +10,7 @@ import UIKit
 import SwiftUI
 
 class ProductsTableViewController: UITableViewController {
+  
     private var category: GetAllCategoryRes
     private var httpClient = StoreHttpClient()
     private var products: [GetProductsByIdRes] = []
@@ -26,6 +27,7 @@ class ProductsTableViewController: UITableViewController {
     
     @objc private func addProductButtonPress(_ sender: UIBarButtonItem) {
         let addProductViewController = AddProductViewController()
+        addProductViewController.delegate = self
         navigationController?.pushViewController(addProductViewController, animated: true)
     }
     
@@ -44,6 +46,14 @@ class ProductsTableViewController: UITableViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        Task {
+            await pupulateProducts()
+            tableView.reloadData()
+        }
+    }
+    
     func pupulateProducts() async{
         do{
             products = try await httpClient.getAllProductsApi(categoryId: category.id)
@@ -59,6 +69,8 @@ class ProductsTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.accessoryType = .disclosureIndicator
+        
         let product = products[indexPath.row]
         cell.contentConfiguration = UIHostingConfiguration(content: {
             ProductCellView(product: product)
@@ -70,5 +82,33 @@ class ProductsTableViewController: UITableViewController {
 //        cell.contentConfiguration = config
        return cell
     }
+    
+   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let productDetailViewController = ProductDetailViewController(product: products[indexPath.row])
+        navigationController?.pushViewController(productDetailViewController, animated: true)
+    }
        
+}
+
+extension ProductsTableViewController:AddProductViewControllerDelegate{
+    func addProductViewControllerDidCancel(_ controller: AddProductViewController) {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    func addProductViewControllerDidSave(_ controller: AddProductViewController, didAddProduct product: GetProductsByIdRes) {
+        let addProductRequest = AddProductReq(product: product)
+        
+        Task {
+            do{
+              let newProduct = try await httpClient.addProductApi(product: addProductRequest)
+                products.insert(newProduct, at: 0)
+                tableView.reloadData()
+                navigationController?.popViewController(animated: true)
+            }catch {
+                print(error)
+            }
+           
+        }
+       
+    }
 }

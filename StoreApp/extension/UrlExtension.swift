@@ -33,4 +33,13 @@ extension URL{
     static func productById(_ id: Int) -> URL{
         return URL(string: "api/v1/categories/\(id)/products" , relativeTo: Self.default)!
     }
+    
+    static var addProductUrl: URL {
+        URL(string: "api/v1/products/" , relativeTo: Self.default)!
+    }
+    
+    static func deleteProductUrl(_ id: Int) -> URL {
+       return URL(string: "api/v1/products/\(id)" , relativeTo: Self.default)!
+    }
+    //https://api.escuelajs.co/api/v1/products/1
 }

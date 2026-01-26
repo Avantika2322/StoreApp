@@ -18,7 +18,7 @@ struct ProductCellView: View {
                     .font(.caption)
             }
             Spacer()
-            Text(product.price, format: .currency(code: Locale.currencyCode)).padding(5).background(Color.yellow).foregroundColor(.black).cornerRadius(5)
+            Text(product.price, format: .currency(code: Locale.currencyCode)).padding(3).background(Color.yellow).foregroundColor(.black).cornerRadius(5).font(.footnote)
         }
     }
 }

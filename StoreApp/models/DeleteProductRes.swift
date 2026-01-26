@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+struct DeleteProductRes: Decodable {
+    var message: String?
+    var rta: Bool?
+    var statusCode: Int?
+    var error: String?
+    
+}
