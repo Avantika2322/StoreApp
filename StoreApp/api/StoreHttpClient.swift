@@ -39,6 +39,42 @@ struct Resource<T: Codable>{
 
 class StoreHttpClient {
     
+    func load<T: Codable>(_ resource: Resource<T>) async throws -> T {
+        var request = URLRequest(url: resource.url)
+        
+        switch resource.httpMethod {
+        case .get(let queryItems):
+            var urlComponents = URLComponents(url: resource.url, resolvingAgainstBaseURL: true)!
+            urlComponents.queryItems = queryItems
+            guard let url = urlComponents.url else {
+                throw NetworkError.invalidURL
+            }
+        case .post(let data):
+            request.httpBody = data
+        default:
+            break
+        }
+        
+        request.allHTTPHeaderFields = resource.headers
+        request.httpMethod = resource.httpMethod.name
+        
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = ["Content-Type": "application/json"]
+        
+        let session = URLSession(configuration: configuration)
+        
+        let (data, response) = try await session.data(for: request)
+        guard let _ = response as? HTTPURLResponse
+        else {
+            throw NetworkError.invalidServerResponse
+        }
+        
+        guard let result = try? JSONDecoder().decode(T.self, from: data) else {
+            throw NetworkError.decodingFailed
+        }
+        return result
+    }
+    
     func getAllCategoriesApi() async throws -> [GetAllCategoryRes] {
        // guard let url = URL(string: "https://api.escuelajs.co/api/v1/categories") else {
          //   throw NetworkError.invalidURL

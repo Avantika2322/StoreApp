@@ -56,7 +56,8 @@ class ProductsTableViewController: UITableViewController {
     
     func pupulateProducts() async{
         do{
-            products = try await httpClient.getAllProductsApi(categoryId: category.id)
+            //products = try await httpClient.getAllProductsApi(categoryId: category.id)
+            products = try await httpClient.load(Resource(url: URL.productById(category.id)))
             tableView.reloadData()
          }catch{
              print("Error")
@@ -100,14 +101,15 @@ extension ProductsTableViewController:AddProductViewControllerDelegate{
         
         Task {
             do{
-              let newProduct = try await httpClient.addProductApi(product: addProductRequest)
+              //let newProduct = try await httpClient.addProductApi(product: addProductRequest)
+                let data = try JSONEncoder().encode(addProductRequest)
+                let newProduct: GetProductsByIdRes = try await httpClient.load(Resource(url: URL.addProductUrl, httpMethod: .post(data)))
                 products.insert(newProduct, at: 0)
                 tableView.reloadData()
                 navigationController?.popViewController(animated: true)
             }catch {
                 print(error)
             }
-           
         }
        
     }

@@ -65,8 +65,11 @@ class ProductDetailViewController: UIViewController {
     @objc private func deleteProductButtonPressed(_ sender: UIButton) {
         Task {
             do{
-                guard product.id != nil else { return }
-                let isDeleted = try await client.deleteProductApi(productId: 1)
+                guard let productId = product.id else { return }
+               // let isDeleted = try await client.deleteProductApi(productId: productId)
+                
+                let isDeleted: Bool = try await client.load(Resource(url: URL.deleteProductUrl(productId), httpMethod: .delete))
+                
                 if isDeleted {
                     navigationController?.popViewController(animated: true)
                 }

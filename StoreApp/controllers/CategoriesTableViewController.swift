@@ -28,7 +28,8 @@ class CategoriesTableViewController: UITableViewController {
     
     private func fetchCategories() async {
         do{
-            categories = try await client.getAllCategoriesApi()
+            categories = try await client.load(Resource(url: URL.allCategoriesUrl))
+           // categories = try await client.getAllCategoriesApi()
             print(categories)
         }
         catch {
