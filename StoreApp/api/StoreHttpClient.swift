@@ -4,6 +4,7 @@
 //
 //  Created by Avantika on 30/03/25.
 //
+import Foundation
 
 enum NetworkError: Error {
     case invalidURL
@@ -12,7 +13,29 @@ enum NetworkError: Error {
     case unknown
 }
 
-import Foundation
+enum HttpMethd{
+    case get([URLQueryItem])
+    case post(Data?)
+    case delete
+    
+    var name: String {
+        switch self {
+        case .get:
+            return "GET"
+        case .post:
+            return "POST"
+        case .delete:
+            return "DELETE"
+        }
+    }
+}
+
+struct Resource<T: Codable>{
+    let url: URL
+    var headers: [String: String] = [:]
+    var httpMethod: HttpMethd = .get([])
+}
+
 
 class StoreHttpClient {
     
@@ -47,26 +70,7 @@ class StoreHttpClient {
         }
         return productDetail
     }
-    
-//    func addProductApi(product: AddProductReq) async throws -> GetProductsByIdRes {
-//        var request = URLRequest(url: URL.addProductUrl)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        
-//        request.httpBody = try JSONEncoder().encode(product)
-//        
-//        let (data, response) = try await URLSession.shared.data(for: request)
-//        
-//        guard let httpResponse = response as? HTTPURLResponse,
-//              httpResponse.statusCode == 201 else {
-//            throw NetworkError.invalidServerResponse
-//        }
-//        
-//        guard let productDetail = try? JSONDecoder().decode(GetProductsByIdRes.self, from: data) else {
-//            throw NetworkError.decodingFailed
-//        }
-//        return productDetail
-//    }
+
     
     func addProductApi(product: AddProductReq) async throws -> GetProductsByIdRes {
         // 1. Prepare request
